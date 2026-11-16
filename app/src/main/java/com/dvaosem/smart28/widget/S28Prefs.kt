@@ -26,6 +26,9 @@ object S28Prefs {
     fun devices(c: Context) = sp(c).getString("devices", "[]") ?: "[]"
     fun saveDevices(c: Context, json: String) { sp(c).edit().putString("devices", json).apply() }
 
+    fun alerts(c: Context) = sp(c).getString("alerts", "{}") ?: "{}"
+    fun saveAlerts(c: Context, json: String) { sp(c).edit().putString("alerts", json).apply() }
+
     fun favorites(c: Context): List<String> {
         val a = try { JSONArray(sp(c).getString("favs", "[]")) } catch (e: Exception) { JSONArray() }
         return (0 until a.length()).map { a.getString(it) }

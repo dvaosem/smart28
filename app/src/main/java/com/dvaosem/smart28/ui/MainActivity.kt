@@ -1,12 +1,15 @@
 package com.dvaosem.smart28.ui
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
@@ -20,8 +23,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.dvaosem.smart28.R
+import com.dvaosem.smart28.widget.Notifier
 import com.dvaosem.smart28.widget.S28Prefs
 import com.dvaosem.smart28.widget.SmartWidget
+import org.json.JSONArray
 import org.json.JSONObject
 
 /**
@@ -92,6 +97,11 @@ class MainActivity : AppCompatActivity() {
         if (savedInstanceState == null || webView.restoreState(savedInstanceState) == null) webView.loadUrl(START_URL)
     }
 
+    private fun requestNotifPermission() {
+        if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED)
+            requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 77)
+    }
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         if (::webView.isInitialized) webView.saveState(outState)
@@ -121,6 +131,7 @@ class MainActivity : AppCompatActivity() {
         fun saveDevices(json: String) {
             if (json.length > 1_000_000) return
             S28Prefs.saveDevices(this@MainActivity, json)
+            try { Notifier.check(this@MainActivity, JSONArray(json)) } catch (e: Exception) { }
             SmartWidget.refreshAll(this@MainActivity)
         }
 
@@ -131,6 +142,22 @@ class MainActivity : AppCompatActivity() {
             S28Prefs.saveFavorites(this@MainActivity, json)
             SmartWidget.refreshAll(this@MainActivity)
         }
+
+        /** Notification rules (JSON) edited in the web Settings panel. */
+        @JavascriptInterface
+        fun getAlerts(): String = S28Prefs.alerts(this@MainActivity)
+
+        @JavascriptInterface
+        fun saveAlerts(json: String) {
+            if (json.length > 20_000) return
+            val on = try { JSONObject(json).optBoolean("on", false) } catch (e: Exception) { return }
+            S28Prefs.saveAlerts(this@MainActivity, json)
+            Notifier.schedule(this@MainActivity, on)
+            if (on) runOnUiThread { requestNotifPermission() }
+        }
+
+        @JavascriptInterface
+        fun testNotification() { requestNotifPermission(); Notifier.test(this@MainActivity) }
 
         @JavascriptInterface
         fun hasWidget(): Boolean = SmartWidget.hasWidgets(this@MainActivity)
