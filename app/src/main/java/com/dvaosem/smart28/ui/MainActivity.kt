@@ -23,6 +23,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.dvaosem.smart28.R
+import com.dvaosem.smart28.widget.CommandWorker
 import com.dvaosem.smart28.widget.Notifier
 import com.dvaosem.smart28.widget.S28Prefs
 import com.dvaosem.smart28.widget.SmartWidget
@@ -154,6 +155,18 @@ class MainActivity : AppCompatActivity() {
             S28Prefs.saveAlerts(this@MainActivity, json)
             Notifier.schedule(this@MainActivity, on)
             if (on) runOnUiThread { requestNotifPermission() }
+        }
+
+        /** Delayed command (e.g. thermostat back to previous temperature after boost). */
+        @JavascriptInterface
+        fun scheduleCommand(id: String, code: String, value: Int, delayMin: Int) {
+            if (id.length > 100 || code.length > 60 || delayMin < 1 || delayMin > 1440) return
+            CommandWorker.schedule(this@MainActivity, id, code, value, delayMin)
+        }
+
+        @JavascriptInterface
+        fun cancelScheduledCommand(id: String, code: String) {
+            CommandWorker.cancel(this@MainActivity, id, code)
         }
 
         @JavascriptInterface

@@ -40,6 +40,7 @@
         </receiver>
 
         <receiver android:name=".ui.InstallResultReceiver" android:exported="false"/>
+        <receiver android:name=".widget.AlertActionReceiver" android:exported="false"/>
 
         <provider
             android:name="androidx.core.content.FileProvider"

@@ -43,7 +43,7 @@ object Notifier {
     private fun canPost(c: Context) =
         Build.VERSION.SDK_INT < 33 || c.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
 
-    private fun post(c: Context, key: String, title: String, text: String) {
+    private fun post(c: Context, key: String, title: String, text: String, action: PendingIntent? = null) {
         if (!canPost(c)) return
         val nm = c.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (nm.getNotificationChannel(CH) == null)
@@ -53,8 +53,9 @@ object Notifier {
         val n = NotificationCompat.Builder(c, CH)
             .setSmallIcon(R.drawable.ic_launcher_fg)
             .setContentTitle(title).setContentText(text)
-            .setContentIntent(open).setAutoCancel(true).build()
-        nm.notify(key.hashCode(), n)
+            .setContentIntent(open).setAutoCancel(true)
+        if (action != null) n.addAction(0, "Vypnúť", action)
+        nm.notify(key.hashCode(), n.build())
     }
 
     fun test(c: Context) = post(c, "test", "smart28", "Notifikácie fungujú.")
@@ -109,7 +110,11 @@ object Notifier {
                     val nightKey = Calendar.getInstance().apply { if (hour < to) add(Calendar.DAY_OF_YEAR, -1) }
                         .let { "${it.get(Calendar.YEAR)}${it.get(Calendar.DAY_OF_YEAR)}" }
                     if (sp.getString("lt_$id", "") != nightKey) {
-                        post(c, "lt_$id", "Svetlo svieti", "$name svieti po ${from}:00")
+                        val nid = "lt_$id".hashCode()
+                        val act = PendingIntent.getBroadcast(c, nid,
+                            Intent(c, AlertActionReceiver::class.java).putExtra("id", id).putExtra("code", sc).putExtra("nid", nid),
+                            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+                        post(c, "lt_$id", "Svetlo svieti", "$name svieti po ${from}:00", act)
                         ed.putString("lt_$id", nightKey)
                     }
                 }
