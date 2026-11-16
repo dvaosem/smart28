@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Smart28" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#b8a994</item>
+        <item name="colorOnPrimary">#22201d</item>
+        <item name="android:windowBackground">@color/bg</item>
+        <item name="android:statusBarColor">@color/bg</item>
+        <item name="android:navigationBarColor">@color/bg</item>
+    </style>
+</resources>

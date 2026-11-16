@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <!-- dom so strechou a plamenom (kúrenie) v bezpečnej zóne ikony -->
+    <path android:fillColor="#F6F3EE"
+        android:pathData="M54,30 L78,50 L72,50 L72,76 L36,76 L36,50 L30,50 Z"/>
+    <path android:fillColor="#6B5F52"
+        android:pathData="M54,46 C60,54 62,58 62,62 C62,67 58,70 54,70 C50,70 46,67 46,62 C46,58 48,56 50,52 C51,55 52,56 53,56 C53,52 53,49 54,46 Z"/>
+</vector>
