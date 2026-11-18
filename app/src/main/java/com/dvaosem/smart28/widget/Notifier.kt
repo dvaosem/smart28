@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit
 /**
  * Phone notifications evaluated from the device snapshot:
  *  - low battery, - light on late at night, - device went offline for a while.
- * Settings JSON (S28Prefs.alerts): {on, bat:{on,lim}, light:{on,from,to,skip:[ids]}, off:{on,min}}.
+ * Settings JSON (S28Prefs.alerts): {on, bat:{on,lim}, light:{on,from,to,skip:[ids]}, off:{on,min,skip:[ids]}}.
  */
 object Notifier {
     private const val CH = "s28-alerts"
@@ -121,7 +121,10 @@ object Notifier {
             }
 
             // offline for a while (only devices seen online before)
-            if (off != null && off.optBoolean("on", true)) {
+            var offSkipped = false
+            val offSkip = off?.optJSONArray("skip")
+            if (offSkip != null) for (k in 0 until offSkip.length()) if (offSkip.optString(k) == id) offSkipped = true
+            if (off != null && off.optBoolean("on", true) && !offSkipped) {
                 if (online) { ed.remove("off_$id"); ed.remove("offA_$id") }
                 else {
                     var began = sp.getLong("off_$id", 0L)
